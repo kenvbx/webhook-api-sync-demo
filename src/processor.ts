@@ -59,10 +59,18 @@ export const processOne = async (db: SqliteDatabase, adapter: DownstreamAdapter,
   return mapEvent(db.prepare('SELECT * FROM inbox_events WHERE id = ?').get(row.id));
 };
 
+export const processEventById = async (db: SqliteDatabase, adapter: DownstreamAdapter, id: number): Promise<InboxEvent | null> => {
+  const raw = db.prepare("SELECT * FROM inbox_events WHERE id = ? AND status = 'received'").get(id) as Record<string, unknown> | undefined;
+  return raw ? processOne(db, adapter, mapEvent(raw)) : null;
+};
+
 export const processPendingOnce = async (db: SqliteDatabase, adapter: DownstreamAdapter): Promise<InboxEvent[]> => {
   const now = new Date().toISOString();
-  const rows = db.prepare("SELECT * FROM inbox_events WHERE status = 'received' AND (next_attempt_at IS NULL OR next_attempt_at <= ?) ORDER BY id").all(now) as Record<string, unknown>[];
+  const rows = db.prepare("SELECT id FROM inbox_events WHERE status = 'received' AND (next_attempt_at IS NULL OR next_attempt_at <= ?) ORDER BY id").all(now) as Array<{ id: number }>;
   const results: InboxEvent[] = [];
-  for (const raw of rows) results.push(await processOne(db, adapter, mapEvent(raw)));
+  for (const row of rows) {
+    const processed = await processEventById(db, adapter, row.id);
+    if (processed) results.push(processed);
+  }
   return results;
 };

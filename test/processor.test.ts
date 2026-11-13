@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { createApp } from '../src/app.js';
-import { processPendingOnce, MockDownstreamAdapter } from '../src/processor.js';
+import { processEventById, processPendingOnce, MockDownstreamAdapter } from '../src/processor.js';
 
 const apps: Array<ReturnType<typeof createApp>> = [];
 const make = () => { const instance = createApp(':memory:'); apps.push(instance); return instance; };
@@ -15,6 +15,13 @@ describe('processor', () => {
     const { db } = make(); insert(db, 'contact.updated', 'evt_a'); const adapter = new MockDownstreamAdapter();
     const first = await processPendingOnce(db, adapter); const second = await processPendingOnce(db, adapter);
     expect(first[0].status).toBe('processed'); expect(first[0].downstreamRef).toMatch(/^sync_/); expect(second).toHaveLength(0);
+  });
+  it('processes only the requested event by id', async () => {
+    const { db } = make(); insert(db, 'contact.updated', 'evt_target'); insert(db, 'contact.created', 'evt_other'); const adapter = new MockDownstreamAdapter();
+    const target = db.prepare("SELECT id FROM inbox_events WHERE event_id = 'evt_target'").get() as { id: number };
+    const result = await processEventById(db, adapter, target.id);
+    const other = db.prepare("SELECT status FROM inbox_events WHERE event_id = 'evt_other'").get() as { status: string };
+    expect(result?.eventId).toBe('evt_target'); expect(other.status).toBe('received');
   });
   it('marks unsupported events ignored', async () => {
     const { db } = make(); insert(db, 'invoice.deleted', 'evt_b');

@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import { Router, type Request, type Response } from 'express';
 import { mapEvent } from './db/database.js';
-import { processPendingOnce, type MockDownstreamAdapter } from './processor.js';
+import { processEventById, type MockDownstreamAdapter } from './processor.js';
 
 type SqliteDatabase = any;
 
@@ -44,7 +44,7 @@ export const opsRouter = (db: SqliteDatabase, downstream: MockDownstreamAdapter)
     if (!row) return fail(res, 404, 'event_not_found', 'Event was not found.');
     if (row.status !== 'failed') return fail(res, 409, 'event_not_failed', 'Only failed events can be replayed.');
     const now = new Date().toISOString(); db.prepare("UPDATE inbox_events SET status = 'received', attempts = 0, next_attempt_at = NULL, last_error = NULL, updated_at = ? WHERE id = ?").run(now, id);
-    const [processed] = await processPendingOnce(db, downstream);
+    const processed = await processEventById(db, downstream, id);
     return res.status(202).json({ data: processed ?? mapEvent(db.prepare('SELECT * FROM inbox_events WHERE id = ?').get(id)), replayed: true });
   });
   return router;
