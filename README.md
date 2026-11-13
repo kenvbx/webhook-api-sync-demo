@@ -1,5 +1,7 @@
 # Webhook API Sync Demo
 
+[![CI](https://github.com/kenvbx/webhook-api-sync-demo/actions/workflows/ci.yml/badge.svg)](https://github.com/kenvbx/webhook-api-sync-demo/actions/workflows/ci.yml)
+
 **Personal Project / Demo Project** — a Node.js + Express + TypeScript service for signed webhook intake, idempotent processing, retries, and operator replay.
 
 ## Portfolio goal
