@@ -18,7 +18,7 @@ This demo provides evidence for Node.js/Express API integration work. It demonst
 
 ## Current status
 
-Slice 1 and Slice 2 are implemented locally: signed receipt, timestamp tolerance, SQLite inbox persistence, duplicate handling, event processing, idempotent downstream mock, bounded retry/backoff, and a polling worker. Slice 3 is implemented with operator API key protection, paginated event listing, failed-event replay, fixed-window rate limits, request IDs, structured JSON logs, a demo sender, and Docker Compose.
+Slice 1 and Slice 2 are implemented locally: signed receipt, timestamp tolerance, SQLite inbox persistence, duplicate handling, event processing, idempotent downstream mock, bounded retry/backoff, and a polling worker. Slice 3 is implemented with operator API key protection, paginated event listing, failed-event replay, fixed-window rate limits, request IDs, structured JSON logs, a demo sender, and Docker Compose. A Stripe test-mode provider adapter now verifies `Stripe-Signature`, rejects live events, and stores Stripe events in the shared inbox.
 
 See [PRODUCT_BRIEF.md](PRODUCT_BRIEF.md), [REQUIREMENTS.md](REQUIREMENTS.md), and [ARCHITECTURE.md](ARCHITECTURE.md).
 
@@ -46,3 +46,8 @@ curl -H 'x-operator-key: local-operator-key-change-me' http://localhost:3010/ops
 `POST /ops/events/:id/replay` requeues only failed events. Logs are JSON and include an `x-request-id`; secrets and full payloads are not logged.
 
 Docker Compose builds the compiled app and persists SQLite under the `webhook-data` volume.
+
+
+## Stripe test-mode webhook
+
+The provider adapter accepts Stripe-shaped test events at `POST /webhooks/stripe`. Set `STRIPE_WEBHOOK_SECRET` to a test-mode signing secret. The adapter verifies the Stripe `t=...,v1=...` signature, enforces timestamp tolerance, rejects `livemode: true`, and stores the event with `provider: stripe`. It does not call Stripe or use live credentials.

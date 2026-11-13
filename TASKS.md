@@ -19,4 +19,5 @@
 - [x] Add health, paginated event list, and replay endpoint.
 - [x] Add operator API key, rate limits, structured logs, and redaction.
 - [x] Add demo sender and Docker Compose.
+- [x] Add Stripe test-mode provider adapter with signature verification and live-mode rejection.
 - [x] Write English setup, walkthrough, limitations, and portfolio copy.
