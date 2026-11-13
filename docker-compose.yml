@@ -1,0 +1,12 @@
+services:
+  webhook-api:
+    build: .
+    ports:
+      - "3010:3010"
+    environment:
+      WEBHOOK_SECRET: local-demo-secret-change-me
+      OPERATOR_API_KEY: local-operator-key-change-me
+    volumes:
+      - webhook-data:/app/data
+volumes:
+  webhook-data:
