@@ -51,3 +51,8 @@ Docker Compose builds the compiled app and persists SQLite under the `webhook-da
 ## Stripe test-mode webhook
 
 The provider adapter accepts Stripe-shaped test events at `POST /webhooks/stripe`. Set `STRIPE_WEBHOOK_SECRET` to a test-mode signing secret. The adapter verifies the Stripe `t=...,v1=...` signature, enforces timestamp tolerance, rejects `livemode: true`, and stores the event with `provider: stripe`. It does not call Stripe or use live credentials.
+
+
+## PostgreSQL integration test
+
+The normal test suite uses SQLite for fast local runs. GitHub Actions also starts PostgreSQL 16 and runs `test/postgres.integration.test.ts` against a real database. That suite verifies the inbox unique constraint, transaction rollback, retry state, and terminal failure persistence.
