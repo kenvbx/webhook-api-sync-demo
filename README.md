@@ -66,3 +66,8 @@ The normal test suite uses SQLite for fast local runs. GitHub Actions also start
 ## Operator UI
 
 Open `/operator` in a browser, enter `OPERATOR_API_KEY`, and inspect metrics and event state. The small static UI supports status/type filters and replay for failed events. The key is kept in `sessionStorage` for the current tab; the API remains the authorization boundary.
+
+
+## Portfolio evidence
+
+See [docs/portfolio/PORTFOLIO_EVIDENCE.md](docs/portfolio/PORTFOLIO_EVIDENCE.md) for a verified feature/evidence map, honest Upwork copy, screenshot plan, and limitations. [docs/portfolio/DEMO_WALKTHROUGH.md](docs/portfolio/DEMO_WALKTHROUGH.md) contains a short recording script.
