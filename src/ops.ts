@@ -26,6 +26,16 @@ const operatorAuth = (req: Request, res: Response, next: () => void) => {
 export const opsRouter = (db: SqliteDatabase, downstream: MockDownstreamAdapter): Router => {
   const router = Router(); const limiter = new FixedWindowLimiter(20, 60_000);
   router.use(operatorAuth);
+  router.get('/metrics', (req, res) => {
+    if (!limiter.allow(`metrics:${req.ip}`)) return fail(res, 429, 'rate_limited', 'Too many operator requests.');
+    const total = Number((db.prepare('SELECT count(*) AS count FROM inbox_events').get() as { count: number }).count);
+    const statusRows = db.prepare('SELECT status, count(*) AS count FROM inbox_events GROUP BY status').all() as Array<{ status: string; count: number }>;
+    const byStatus = Object.fromEntries(statusRows.map((row) => [row.status, Number(row.count)]));
+    const attempts = Number((db.prepare('SELECT COALESCE(SUM(attempts), 0) AS total FROM inbox_events').get() as { total: number }).total);
+    const processed = Number((db.prepare("SELECT count(*) AS count FROM inbox_events WHERE status = 'processed'").get() as { count: number }).count);
+    const latency = db.prepare("SELECT AVG((julianday(processed_at) - julianday(created_at)) * 86400000.0) AS average_ms FROM inbox_events WHERE processed_at IS NOT NULL").get() as { average_ms: number | null };
+    return res.json({ data: { totalEvents: total, byStatus, pendingEvents: byStatus.received ?? 0, failedEvents: byStatus.failed ?? 0, processedEvents: processed, totalAttempts: attempts, retries: Math.max(0, attempts - total), averageProcessingLatencyMs: latency.average_ms === null ? null : Math.round(latency.average_ms) } });
+  });
   router.get('/events', (req, res) => {
     if (!limiter.allow(`list:${req.ip}`)) return fail(res, 429, 'rate_limited', 'Too many operator requests.');
     const page = Math.max(1, Number(req.query.page) || 1); const perPage = Math.min(100, Math.max(1, Number(req.query.per_page) || 25));

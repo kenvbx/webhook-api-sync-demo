@@ -56,3 +56,8 @@ The provider adapter accepts Stripe-shaped test events at `POST /webhooks/stripe
 ## PostgreSQL integration test
 
 The normal test suite uses SQLite for fast local runs. GitHub Actions also starts PostgreSQL 16 and runs `test/postgres.integration.test.ts` against a real database. That suite verifies the inbox unique constraint, transaction rollback, retry state, and terminal failure persistence.
+
+
+## Basic metrics
+
+`GET /ops/metrics` uses the operator API key and returns inbox volume, status counts, pending/failed events, total attempts, retry count, and average processing latency for processed events. These are database-derived operational metrics for the demo; no external metrics backend is configured.
