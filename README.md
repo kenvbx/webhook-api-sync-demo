@@ -61,3 +61,8 @@ The normal test suite uses SQLite for fast local runs. GitHub Actions also start
 ## Basic metrics
 
 `GET /ops/metrics` uses the operator API key and returns inbox volume, status counts, pending/failed events, total attempts, retry count, and average processing latency for processed events. These are database-derived operational metrics for the demo; no external metrics backend is configured.
+
+
+## Operator UI
+
+Open `/operator` in a browser, enter `OPERATOR_API_KEY`, and inspect metrics and event state. The small static UI supports status/type filters and replay for failed events. The key is kept in `sessionStorage` for the current tab; the API remains the authorization boundary.

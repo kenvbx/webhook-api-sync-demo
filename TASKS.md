@@ -22,4 +22,5 @@
 - [x] Add Stripe test-mode provider adapter with signature verification and live-mode rejection.
 - [x] Add PostgreSQL integration test for inbox constraints, rollback, and retry state.
 - [x] Add operator metrics endpoint for volume, status, retries, and processing latency.
+- [x] Add small operator UI for metrics, event filters, and failed-event replay.
 - [x] Write English setup, walkthrough, limitations, and portfolio copy.

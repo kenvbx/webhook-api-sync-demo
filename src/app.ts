@@ -14,6 +14,7 @@ export const createApp = (databasePath = config.databasePath) => {
   app.use((req, _res, next) => { log('info', 'request_received', { requestId: _res.locals.requestId, method: req.method, path: req.path }); next(); });
   const downstream = new MockDownstreamAdapter();
   app.get('/health', (_req, res) => res.json({ data: { status: 'ok', database: 'ready' } }));
+  app.use('/operator', express.static('public/operator', { extensions: ['html'] }));
   app.locals.processPendingOnce = () => processPendingOnce(db, downstream);
   app.use('/webhooks', express.raw({ type: 'application/json', limit: config.maxWebhookBodyBytes }), webhookRouter(db));
   app.use(express.json({ limit: '64kb' }));
